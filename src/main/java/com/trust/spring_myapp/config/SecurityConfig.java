@@ -4,12 +4,8 @@ import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.security.config.annotation.web.builders.HttpSecurity;
 import org.springframework.security.config.annotation.web.configuration.EnableWebSecurity;
-import org.springframework.security.core.userdetails.User;
-import org.springframework.security.core.userdetails.UserDetails;
-import org.springframework.security.core.userdetails.UserDetailsService;
 import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.security.crypto.password.PasswordEncoder;
-import org.springframework.security.provisioning.InMemoryUserDetailsManager;
 import org.springframework.security.web.SecurityFilterChain;
 
 @Configuration
@@ -19,18 +15,6 @@ public class SecurityConfig {
 	@Bean
     public PasswordEncoder passwordEncoder() {
         return new BCryptPasswordEncoder();
-    }
-	
-	// 設定した情報でログインするためのメソッド
-	@Bean
-    public UserDetailsService userDetailsService(PasswordEncoder passwordEncoder) {
-        InMemoryUserDetailsManager manager = new InMemoryUserDetailsManager();
-        UserDetails user = User.withUsername("test@email.com")
-                .password(passwordEncoder.encode("1234"))
-                .roles("USER")
-                .build();
-        manager.createUser(user);
-        return manager;
     }
 	
 	@Bean
@@ -57,7 +41,7 @@ public class SecurityConfig {
         ).authorizeHttpRequests(authz -> authz
         	// 全てのユーザーにリクエストを許可するパス
             .requestMatchers("/css/**", "/webjars/**").permitAll() // permitAll()常にアクセスを許可
-            .requestMatchers("/login", "/signup").permitAll() // denyAll()	常にアクセスを拒否
+            .requestMatchers("/login", "/signup", "/list").permitAll() // denyAll()	常にアクセスを拒否
             .anyRequest()
             .authenticated()
         );

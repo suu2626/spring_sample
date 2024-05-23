@@ -5,11 +5,10 @@ import java.util.List;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.Query;
 
-import com.trust.spring_myapp.entity.Users;
-
+import com.trust.spring_myapp.domain.Users;
 
 public interface UserRepository extends JpaRepository<Users, Integer> {
-	@Query("SELECT u FROM Users ORDER BY u.id")
-	List<Users> findAllOrderById();
-	
+    //ポイント①
+    @Query("SELECT u FROM Customer ORDER BY u.id")
+    List<Users> findAllOrderById();
 }
