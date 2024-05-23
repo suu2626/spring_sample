@@ -15,37 +15,13 @@ import org.springframework.security.web.SecurityFilterChain;
 @Configuration
 @EnableWebSecurity
 public class SecurityConfig {
-	@Bean
-    public SecurityFilterChain securityFilterChain(HttpSecurity http) throws Exception {
-        http.formLogin(login -> login
-        	// ログインの処理をするURL
-            .loginProcessingUrl("/login")
-            // ログイン画面のURL
-            .loginPage("/login")
-            // ログインが成功した際に遷移されるURL
-            .defaultSuccessUrl("/")
-            // ログイン画面のhtmlのinputのname属性
-            .usernameParameter("email")
-            .passwordParameter("password")
-            // ログインに失敗した際のURL
-            .failureUrl("/login?error")
-            .permitAll()
-        ).logout(logout -> logout
-        	// ログアウトした際のURLs
-            .logoutSuccessUrl("/login")
-        ).authorizeHttpRequests(authz -> authz
-            .requestMatchers("/css/**", "/webjars/**").permitAll()
-            .requestMatchers("/login", "/signup").permitAll()
-            .anyRequest().authenticated()
-        );
-        return http.build();
-    }
-
+	// パスワードエンコーダー
 	@Bean
     public PasswordEncoder passwordEncoder() {
         return new BCryptPasswordEncoder();
     }
 	
+	// 設定した情報でログインするためのメソッド
 	@Bean
     public UserDetailsService userDetailsService(PasswordEncoder passwordEncoder) {
         InMemoryUserDetailsManager manager = new InMemoryUserDetailsManager();
@@ -55,5 +31,36 @@ public class SecurityConfig {
                 .build();
         manager.createUser(user);
         return manager;
+    }
+	
+	@Bean
+    public SecurityFilterChain securityFilterChain(HttpSecurity http) throws Exception {
+		// httpオブジェクトのformLoginメソッドを呼び出しフォームベースのログイン設定を行う
+		// login	(フォームログインの詳細設定を行うためのラムダ式の引数)
+        http.formLogin(login -> login
+        	// ログインの処理を行うURL
+            .loginProcessingUrl("/login")
+            // カスタムログイン画面のURL
+            .loginPage("/login")
+            // ログインが成功した際に遷移されるURL
+            .defaultSuccessUrl("/")
+            // ログイン画面のhtmlのinputのname属性
+            .usernameParameter("email")
+            .passwordParameter("password")
+            // ログインに失敗した際のURL
+            .failureUrl("/login?error").permitAll()
+        // logout設定の呼び出し
+        ).logout(logout -> logout
+        	// ログアウトした際のURL	
+            .logoutSuccessUrl("/login")
+        // HTTPリクエストに対する認可設定 authz(認可設定を行うためのラムダ式の引数)
+        ).authorizeHttpRequests(authz -> authz
+        	// 全てのユーザーにリクエストを許可するパス
+            .requestMatchers("/css/**", "/webjars/**").permitAll() // permitAll()常にアクセスを許可
+            .requestMatchers("/login", "/signup").permitAll() // denyAll()	常にアクセスを拒否
+            .anyRequest()
+            .authenticated()
+        );
+        return http.build();
     }
 }
